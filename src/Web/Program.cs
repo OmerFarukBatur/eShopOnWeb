@@ -22,6 +22,11 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole();
 
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+{
+    policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+}));
+
 if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == "Docker"){
     // Configure SQL Server (local)
     Microsoft.eShopWeb.Infrastructure.Dependencies.ConfigureServices(builder.Configuration, builder.Services);
@@ -77,6 +82,8 @@ builder.Services.AddMvc(options =>
              new SlugifyParameterTransformer()));
 
 });
+builder.Services.AddControllers();
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages(options =>
 {
@@ -104,14 +111,14 @@ builder.Services.AddScoped<HttpClient>(s => new HttpClient
     BaseAddress = new Uri(baseUrlConfig!.WebBase)
 });
 
+
+
 // add blazor services
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<HttpService>();
 builder.Services.AddBlazorServices();
-
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 var app = builder.Build();
 
@@ -181,6 +188,8 @@ else
     app.UseHsts();
 }
 
+app.UseCors();
+
 app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
@@ -189,7 +198,6 @@ app.UseRouting();
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapControllerRoute("default", "{controller:slugify=Home}/{action:slugify=Index}/{id?}");
 app.MapRazorPages();

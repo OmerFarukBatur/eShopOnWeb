@@ -1,0 +1,47 @@
+﻿@page "/orders"
+@model BlazorAdmin.Pages.OrderItemPage.OrderListModel
+<PageTitle>eShopOnWeb Admin: Manage Orders</PageTitle>
+
+<h1>Manage Orders</h1>
+
+@if (Model.allOrders == null)
+{
+    <Spinner></Spinner>
+}
+else
+{
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Buyer Id</th>
+                <th>Order Date</th>
+                <th>Total Price</th>
+                 <th>Actions</th> 
+            </tr>
+        </thead>
+        <tbody class="cursor-pointer">
+            @foreach (var item in Model.allOrders)
+            {
+                <tr>
+                    <td>@item.OrderId</td>
+                    <td>@item.BuyerId</td>
+                    <td>@item.OrderDate</td>
+                    <td>@item.Total</td>
+                    <td>
+                         <button class="btn btn-primary">
+                            Edit @* @onclick="@(() => EditClick(item.OrderId))" @onclick:stopPropagation="true" *@
+                        </button> 
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @* <Details Brands="@catalogBrands" Types="@catalogTypes" OnEditClick="EditClick" @ref="DetailsComponent"></Details>
+    <Edit Brands="@catalogBrands" Types="@catalogTypes" OnSaveClick="ReloadCatalogItems" @ref="EditComponent"></Edit>
+    <Create Brands="@catalogBrands" Types="@catalogTypes" OnSaveClick="ReloadCatalogItems" @ref="CreateComponent"></Create>
+    <Delete Brands="@catalogBrands" Types="@catalogTypes" OnSaveClick="ReloadCatalogItems" @ref="DeleteComponent"></Delete> *@
+}

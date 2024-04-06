@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Ardalis.GuardClauses;
-using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
@@ -14,10 +13,10 @@ public class OrderService : IOrderService
     private readonly IRepository<Order> _orderRepository;
     private readonly IUriComposer _uriComposer;
     private readonly IRepository<Basket> _basketRepository;
-    private readonly IRepository<CatalogItem> _itemRepository;
+    private readonly IRepository<Entities.CatalogItem> _itemRepository;
 
     public OrderService(IRepository<Basket> basketRepository,
-        IRepository<CatalogItem> itemRepository,
+        IRepository<Entities.CatalogItem> itemRepository,
         IRepository<Order> orderRepository,
         IUriComposer uriComposer)
     {
@@ -50,4 +49,8 @@ public class OrderService : IOrderService
 
         await _orderRepository.AddAsync(order);
     }
+
+    
 }
+
+

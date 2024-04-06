@@ -1,0 +1,151 @@
+﻿@inject ILogger<Details> Logger
+@inject IJSRuntime JSRuntime
+@inject HttpClient Http
+
+@inherits BlazorAdmin.Helpers.BlazorComponent
+
+@namespace BlazorAdmin.Pages.OrderItemPage
+@using System.Text
+@using System.Text.Json
+
+<div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
+    <div class="modal-dialog" role="document" style="overflow-y: initial;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">ORDER DETAILS</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style=" height: max-content;width: max-content;">
+
+                @if (_item == null)
+                {
+                    <Spinner></Spinner>
+                }
+                else
+                {
+                    <div class="container" style="text-align:start;padding-left: 2px;">
+                        <section class="esh-orders-detail-section">
+                            @* <article class="esh-orders-detail-titles row" style="display: none;">
+                        <article class="esh-orders-detail-items esh-orders-detail-items--border row" style="width: -webkit-fill-available; text-align: start; display: ruby-text;">
+                        <h6 class=" col-md-4 hidden-md-down" style="text-align: center;"> Picture </h6>
+                        <h6 class=" col-xs-4" style="text-align: center;">ProductName</h6>
+                        <h6 class=" col-xs-1" style="text-align: center;">Unit Price</h6>
+                        <h6 class=" col-xs-1" style="text-align: center;">Unit</h6>
+                        <h6 class=" col-xs-2" style="text-align: center;">Unit Total</h6>
+                        </article>
+                        </article> *@
+
+                            @for (int i = 0; i < _item.Count; i++)
+                            {
+                                var item = _item[i];
+                                decimal total = 0;
+                                <article class="esh-orders-detail-items esh-orders-detail-items--border row" style="flex-wrap: nowrap;margin-left: -20px;display: ruby-text; ">
+                                    <h6 class=" col-md-4 hidden-md-down" style="text-align: center;">
+                                        <img class="esh-orders-detail-image" src="@item.PictureUri" style="height: auto;width: 120px;">
+                                    </h6>
+                                    <h6 class=" col-xs-4" style="text-align: center; font-size: smaller;">@item.ProductName</h6>
+                                    <h6 class=" col-xs-1" style="text-align: center; font-size: smaller;">$ @item.UnitPrice.ToString("N2")</h6>
+                                    <h6 class=" col-xs-1" style="text-align: center; font-size: smaller;">@item.Unit</h6>
+                                    <h6 class=" col-xs-2" style="text-align: center; font-size: smaller;">$ @Math.Round(item.Unit * item.UnitPrice, 2).ToString("N2")</h6>
+                                </article>
+                            }
+                        </section>
+
+                        <section class="esh-orders-detail-section esh-orders-detail-section--right">
+                            <article class="esh-orders-detail-titles esh-basket-titles--clean row" style="display: ruby-text;">
+                                <section class="esh-orders-detail-title col-xs-9"></section>
+                                <section class="esh-orders-detail-title col-xs-2">TOTAL</section>
+                            </article>
+
+                            <article class="esh-orders-detail-items row" style="display: ruby-text;">
+                                <section class="esh-orders-detail-item col-xs-9"></section>
+                                <section class="esh-orders-detail-item esh-orders-detail-item--mark col-xs-2">$ @total.ToString("N2")</section>
+                            </article>
+                        </section>
+
+                    </div>
+                }
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="Close">Close</button>
+                <button class="btn btn-primary" @onclick="@(() => EditClick(_item[0].OrderId))" @onclick:stopPropagation="true">
+                    @buttonText
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (_showDetailsModal)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+
+    [Parameter]
+    public EventCallback<int> OnEditClick { get; set; }
+
+    //private bool HasPicture => !string.IsNullOrEmpty(_item.PictureUri);
+    private string _modalDisplay = "none;";
+    private string _modalClass = "";
+    private bool _showDetailsModal = false;
+    private List<OrderByIdItems> _item = new();
+    decimal total = 0;
+    bool OrderStatus;
+    string buttonText = "";
+
+    public async Task EditClick(int id)
+    {
+        var formData = new MultipartFormDataContent();
+        formData.Add(new StringContent(id.ToString()), "id");
+
+        await Http.PostAsync($"/Service/UpdateOrderStatus/", formData);
+        await Close();
+    }
+
+    public async Task Open(int id)
+    {
+        total = 0;
+
+        //Logger.LogInformation("Now loading... /Catalog/Details/{Id}", id);
+
+        await new Css(JSRuntime).HideBodyOverflow();
+
+        OrderByIdItemsResponse orderItems = await Http.GetFromJsonAsync<OrderByIdItemsResponse>($"/Service/Detail/{id}");
+        _item = orderItems.OrderItems;
+
+        if (orderItems.OrderStatus)
+        {
+            buttonText = "To Reject";
+        }else
+        {
+            buttonText = "Approve";
+        }        
+
+        foreach (var item in _item)
+        {
+            total += item.Unit * item.UnitPrice;
+        }
+
+        _modalDisplay = "block;";
+        _modalClass = "Show";
+        _showDetailsModal = true;
+
+        StateHasChanged();
+    }
+
+    public async Task Close()
+    {
+        
+        await new Css(JSRuntime).ShowBodyOverflow();
+
+        _modalDisplay = "none";
+        _modalClass = "";
+        _showDetailsModal = false;        
+    }
+
+}

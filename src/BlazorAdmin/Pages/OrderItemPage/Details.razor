@@ -89,7 +89,6 @@
     [Parameter]
     public EventCallback<int> OnEditClick { get; set; }
 
-    //private bool HasPicture => !string.IsNullOrEmpty(_item.PictureUri);
     private string _modalDisplay = "none;";
     private string _modalClass = "";
     private bool _showDetailsModal = false;
@@ -111,7 +110,6 @@
     {
         total = 0;
 
-        //Logger.LogInformation("Now loading... /Catalog/Details/{Id}", id);
 
         await new Css(JSRuntime).HideBodyOverflow();
 

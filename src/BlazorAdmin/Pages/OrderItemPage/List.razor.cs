@@ -19,8 +19,6 @@ public partial class List : BlazorComponent
     
 
     private List<AllOrders> allOrders = new List<AllOrders>();
-
-    private Edit EditComponent { get; set; }
     private Details DetailsComponent { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -38,11 +36,6 @@ public partial class List : BlazorComponent
     private async void DetailsClick(int id)
     {
         await DetailsComponent.Open(id);
-    }
-
-    private async Task EditClick(int id)
-    {
-        await EditComponent.Open(id);
     }
 
     private async Task ReloadCatalogItems()
